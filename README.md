@@ -1,1 +1,1 @@
-# Practica-5-Ising
+# Practica-7-Ising
