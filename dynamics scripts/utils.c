@@ -41,7 +41,7 @@ double delta_energia(Parametros p, int red[p.L][p.L], Posicion pos){
 }
    
 
-double probabilidad_glauber(double delta_E, double kBT){
+double probabilidad_glauber(double delta_E, Parametros p){
     double prob;
     //Tratemos primero los casos especiales
     //1-Si ambas configuraicones tienen la misma energia, entonces la probabilidad de inversion es 1/2
@@ -49,7 +49,7 @@ double probabilidad_glauber(double delta_E, double kBT){
         prob=0.5;
     }
     //2-Para temperatura 0 un cambio que disminuye la energia se acepta siempre y uno que la aumenta se rechaza siempre
-    if (kBT == 0.0) {
+    if (p.kBT == 0.0) {
         if(delta_E<0.0){
             prob=1.0;
         }
@@ -60,14 +60,14 @@ double probabilidad_glauber(double delta_E, double kBT){
 
     //Caso general
    
-    if (delta_E > 0.0 && kBT>0.0) {
-        prob=1/(1+exp(delta_E/kBT));
+    if (delta_E > 0.0 && p.kBT>0.0) {
+        prob=1/(1+exp(delta_E/p.kBT));
     }
 
     return prob;
 }
 
-void intento_glauber(Parametros p, int red[p.L][p.L],double kBT){
+void intento_glauber(Parametros p, int red[p.L][p.L]){
     Posicion pos;
     double delta_E,prob;
 
@@ -77,21 +77,33 @@ void intento_glauber(Parametros p, int red[p.L][p.L],double kBT){
 
     //Calculamos la diferencia de energía y con ello la probabilidad
     delta_E = delta_energia(p, red, pos);
-    prob = probabilidad_glauber(delta_E, kBT);
+    prob = probabilidad_glauber(delta_E, p);
 
     if (Random() < prob) {
         red[pos.y][pos.x] = -red[pos.y][pos.x];
-        return 1;
     }
 }
 
-void paso_glauber(Parametros p, int red[p.L][p.L], double kBT){
+void paso_glauber(Parametros p, int red[p.L][p.L]){
 
     int i,n_espines;
 
     n_espines = (int)p.L * p.L;
 
     for (i = 0; i < n_espines; i++) {
-        intento_glauber(p, red,kBT);
+        intento_glauber(p, red);
     }
+}
+
+double magnetizacion(Parametros p,int red[p.L][p.L]){
+    int i,j;
+    double M;
+    M=0;
+    for(i=0;i<p.L;i++){
+        for(j=0;j<p.L;j++){
+            M+=red[i][j];
+        }
+    }
+
+    return M;
 }
