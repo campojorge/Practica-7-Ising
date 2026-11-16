@@ -1,4 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "utils.h"
+#include "Random_utils.h"
 #include <math.h>
 
 double delta_energia(Parametros p, int red[p.L][p.L], Posicion pos){
@@ -34,7 +37,7 @@ double delta_energia(Parametros p, int red[p.L][p.L], Posicion pos){
     suma_vecinos = red[arriba][pos.x] + red[abajo][pos.x]+ red[pos.y][izquierda] + red[pos.y][derecha];
 
     delta=2.0 * red[pos.y][pos.x] * (p.J * suma_vecinos + p.H);
-    return delta
+    return delta;
 }
    
 
@@ -60,35 +63,35 @@ double probabilidad_glauber(double delta_E, double kBT){
     if (delta_E > 0.0 && kBT>0.0) {
         prob=1/(1+exp(delta_E/kBT));
     }
-    
+
     return prob;
 }
 
-int intento_glauber(const Parametros *p, int red[p->L][p->L],
-                    double (*uniforme)(void))
-{
+void intento_glauber(Parametros p, int red[p.L][p.L],double kBT){
     Posicion pos;
-    pos.y = (int)(uniforme() * p->L);
-    pos.x = (int)(uniforme() * p->L);
+    double delta_E,prob;
 
-    double delta_E = delta_energia(p, red, pos);
-    double probabilidad = probabilidad_glauber(delta_E, p->kBT);
+    //Elegimos un espin cualquiera
+    pos.y = (int)(Random() * p.L);
+    pos.x = (int)(Random() * p.L);
 
-    if (uniforme() < probabilidad) {
+    //Calculamos la diferencia de energía y con ello la probabilidad
+    delta_E = delta_energia(p, red, pos);
+    prob = probabilidad_glauber(delta_E, kBT);
+
+    if (Random() < prob) {
         red[pos.y][pos.x] = -red[pos.y][pos.x];
         return 1;
     }
-    return 0;
 }
 
-size_t paso_glauber(const Parametros *p, int red[p->L][p->L],
-                    double (*uniforme)(void))
-{
-    size_t aceptados = 0;
-    size_t n_espines = (size_t)p->L * p->L;
+void paso_glauber(Parametros p, int red[p.L][p.L], double kBT){
 
-    for (size_t intento = 0; intento < n_espines; ++intento) {
-        aceptados += intento_glauber(p, red, uniforme);
+    int i,n_espines;
+
+    n_espines = (int)p.L * p.L;
+
+    for (i = 0; i < n_espines; i++) {
+        intento_glauber(p, red,kBT);
     }
-    return aceptados;
 }
