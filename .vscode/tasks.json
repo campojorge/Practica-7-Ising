@@ -1,4 +1,4 @@
-{
+/*{
     "tasks": [
         {
             "type": "cppbuild",
@@ -25,4 +25,70 @@
         }
     ],
     "version": "2.0.0"
+}*/
+
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "process",
+            "label": "Compilar Ising C",
+            "command": "gcc",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "main.c",
+                "random.c",
+                "utils.c",
+                "-lm",
+                "-o",
+                "main"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/dynamics scripts"
+            },
+            "windows": {
+                "command": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+                "args": [
+                    "-fdiagnostics-color=always",
+                    "-g",
+                    "main.c",
+                    "random.c",
+                    "utils.c",
+                    "-lm",
+                    "-o",
+                    "main.exe"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}\\dynamics scripts",
+                    "env": {
+                        "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
+                    }
+                }
+            },
+            "osx": {
+                "command": "gcc",
+                "args": [
+                    "-fdiagnostics-color=always",
+                    "-g",
+                    "main.c",
+                    "random.c",
+                    "utils.c",
+                    "-lm",
+                    "-o",
+                    "main"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}/dynamics scripts"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
 }

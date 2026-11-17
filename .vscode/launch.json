@@ -1,8 +1,42 @@
-{
+/*{
 
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": []
+}*/
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Compilar y Ejecutar Ising (C)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/dynamics scripts/main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/dynamics scripts",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "Compilar Ising C",
+            "windows": {
+                "program": "${workspaceFolder}\\dynamics scripts\\main.exe",
+                "MIMode": "gdb",
+                "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe"
+            },
+            "osx": {
+                "program": "${workspaceFolder}/dynamics scripts/main",
+                "MIMode": "lldb"
+            },
+            "setupCommands": [
+                {
+                    "description": "Habilitar pretty-printing para gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
 }
