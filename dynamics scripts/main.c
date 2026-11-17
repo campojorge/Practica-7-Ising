@@ -26,7 +26,7 @@ int main(){
     n_sim=1;
     ini_ran(123456);
 
-    snprintf(filename1, sizeof(filename1),"../data_resutls/N=%d_J=%lf_H=%lf_kBT=%lf.csv",N ,p.J,p.H,p.kBT);
+    snprintf(filename1, sizeof(filename1),"../data_results/N=%d_J=%lf_H=%lf_kBT=%lf.csv",N ,p.J,p.H,p.kBT);
     f=fopen(filename1, "w");
 
     if (f == NULL) {
