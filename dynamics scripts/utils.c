@@ -158,8 +158,7 @@ int clase_sitio(Parametros p,int red[],int sitio){
     
 
     if(red[sitio] == 1){
-        clase=n_arriba;
-
+        clase=4 - n_arriba;
     }
     else if(red[sitio] == -1){
         clase=(5-n_arriba)+4;
@@ -209,7 +208,7 @@ void inicializar_nfold(Parametros p,Nfold *nf,int red[]){
 
 
     // Número total de espines
-    nf->N = p.L * p.L;
+    
 
     // Preparar las diez clases
     for (c = 0; c < 10; c++){
@@ -247,15 +246,13 @@ void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_
     // Peso de cada clase: n_c * p_c 
     for(i = 0;i<10; i++)
     {
-      for (c = 0; c < i; c++) 
+      for (c = 0; c <= i; c++) 
     {
         peso[c] = nf->NNCLS[c] * nf->prob[c];
         W[i] += peso[c];
     }  
     }
     
-
-
     // Probabilidad total de aceptar un intento 
     for(i=0;i<10;i++)
     Q[i] = W[i] / nf->N;
@@ -272,7 +269,7 @@ void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_
         m = 1.0;
     } 
     else {
-        m = floor(log(Random()) / log1p(-Q[9])) + 1.0;
+        m = floor(log(1 - Random()) / log1p(-Q[9])) + 1.0;
     }
 
 
@@ -292,7 +289,7 @@ void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_
     }
 
     //Elegir un espín dentro de esa clase 
-    ind = Random() * nf->NNCLS[c_elegida];
+    ind =(int)(Random() * nf->NNCLS[c_elegida]);
 
     sitio = nf->LOC[c_elegida][ind];
 
@@ -308,17 +305,10 @@ void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_
     //Sacar los sitios afectados de sus clases 
     for (i = 0; i < 5; i++) {
         eliminar(nf, afectados[i]);
-    }
-
-    // Girar el espín seleccionado 
-
-
-    red[sitio] = -red[sitio];
-
-    *delta_M = 2 * red[sitio];
+    } 
 
     // Introducir los sitios en sus nuevas clases 
-    for (i = 0; i < n_afectados; i++) {
+    for (i = 0; i < 5; i++) {
         clase_f[i] = clase_sitio(p, red, afectados[i]);
     }
 
@@ -328,6 +318,7 @@ void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_
         insertar(nf,afectados[i],clase_f[i]);
     }
 
+    *delta_M = 2 * red[sitio];
     *intentos = m;
 }
 
