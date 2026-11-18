@@ -29,11 +29,13 @@ double delta_energia2(Parametros p, int clase);
 double probabilidad_glauber(double delta_E, Parametros p);
 void intento_glauber(Parametros p, int red[]);
 double magnetizacion(Parametros p,int red[]);
+/*
+
 int clase_sitio(Parametros p,int red[],int sitio);
 void insertar(Nfold *nf, int sitio, int c);
 void eliminar(Nfold *nf, int sitio);
 void inicializar_nfold(Parametros p,Nfold *nf, int red[]);
 int paso_nfold(const Parametros *p,int red[p->L][p->L],Nfold *nf,double (*uniforme)(void),uint64_t *intentos,int *delta_M);
 
-
+*/
 

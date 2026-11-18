@@ -98,7 +98,7 @@ double probabilidad_glauber(double delta_E, Parametros p){
 
     //Caso general
    
-    if (delta_E > 0.0 && p.kBT>0.0) {
+    if ( p.kBT>0.0) {
         prob=1/(1+exp(delta_E/p.kBT));
     }
 
@@ -115,7 +115,7 @@ void intento_glauber(Parametros p, int red[]){
 
 
     //Calculamos la diferencia de energía y con ello la probabilidad
-    delta_E = delta_energia(p, red);
+    delta_E = delta_energia(p, red,sitio);
     prob = probabilidad_glauber(delta_E, p);
 
     if (Random() < prob) {
@@ -134,6 +134,7 @@ double magnetizacion(Parametros p,int red[]){
     return M;
 }
 
+/*
 int clase_sitio(Parametros p,int red[],int sitio){
     int v[4];
     int n_arriba,i,clase;
@@ -154,7 +155,7 @@ int clase_sitio(Parametros p,int red[],int sitio){
 
     Clases 5..9:
         espín -1 con 4,3,2,1,0 vecinos arriba.
-    */
+    
 
     if(red[sitio] == 1){
         clase=n_arriba;
@@ -168,7 +169,7 @@ int clase_sitio(Parametros p,int red[],int sitio){
 }
 
 
-/*  MANEJO DE LAS LISTAS */
+/*  MANEJO DE LAS LISTAS 
 
 void insertar(Nfold *nf, int sitio, int c){
     int pos;
@@ -189,7 +190,7 @@ void eliminar(Nfold *nf, int sitio){
     /*
     Rellenamos el hueco con el último elemento
     de la misma clase.
-    */
+    
     nf->cantidad[c]--;
 
     ultimo = nf->lista[c][nf->cantidad[c]];
@@ -199,7 +200,7 @@ void eliminar(Nfold *nf, int sitio){
 }
 
 
-/*INICIALIZACIÓN*/
+/*INICIALIZACIÓN
 
 void inicializar_nfold(Parametros p,Nfold *nf,int red[]){
 
@@ -237,14 +238,14 @@ void paso_nfold(const Parametros p,int red[],Nfold *nf,double (*uniforme)(void),
     *intentos = 0;
     *delta_M = 0;
 
-    /* Peso de cada clase: n_c * p_c */
+    /* Peso de cada clase: n_c * p_c 
     for (c = 0; c < 10; c++) {
         peso[c] = nf->cantidad[c] * nf->prob[c];
         W += peso[c];
     }
 
 
-    /* Probabilidad total de aceptar un intento */
+    /* Probabilidad total de aceptar un intento 
     Q = W / nf->N;
 
 
@@ -254,7 +255,7 @@ void paso_nfold(const Parametros p,int red[],Nfold *nf,double (*uniforme)(void),
         m = floor(log(r) / log(1-Q)) + 1
 
     Se toma r = 1-u, con u en [0,1).
-    */
+    
 
     if (Q >= 1.0) {
         m = 1.0;
@@ -264,7 +265,7 @@ void paso_nfold(const Parametros p,int red[],Nfold *nf,double (*uniforme)(void),
     }
 
 
-    /* Elegir la clase */
+    /* Elegir la clase 
     objetivo = uniforme() * W;
     acumulada = 0.0;
 
@@ -280,7 +281,7 @@ void paso_nfold(const Parametros p,int red[],Nfold *nf,double (*uniforme)(void),
         }
     }
 
-    /* Elegir un espín dentro de esa clase */
+    /* Elegir un espín dentro de esa clase 
     ind = (int)(uniforme() * nf->cantidad[c_elegida]);
 
     sitio = nf->lista[c_elegida][ind];
@@ -299,26 +300,26 @@ void paso_nfold(const Parametros p,int red[],Nfold *nf,double (*uniforme)(void),
             }
         }
 
-        /* Para L=2 algunos vecinos aparecen repetidos */
+        /* Para L=2 algunos vecinos aparecen repetidos 
         if (!repetido) {
             afectados[n_afectados] = v[i];
             n_afectados++;
         }
     }
 
-    /* Sacar los sitios afectados de sus clases */
+    /* Sacar los sitios afectados de sus clases 
     for (i = 0; i < n_afectados; i++) {
         eliminar(nf, afectados[i]);
     }
 
-    /* Girar el espín seleccionado */
+    /* Girar el espín seleccionado 
 
 
     red[sitio] = -red[sitio];
 
     *delta_M = 2 * red[sitio];
 
-    /* Introducir los sitios en sus nuevas clases */
+    /* Introducir los sitios en sus nuevas clases 
     for (int i = 0; i < n_afectados; ++i) {
         int c = clase_sitio(p, red, afectados[i]);
 
@@ -327,3 +328,6 @@ void paso_nfold(const Parametros p,int red[],Nfold *nf,double (*uniforme)(void),
 
     *intentos = (uint64_t)m;
 }
+
+*/
+

@@ -13,13 +13,13 @@ int main(){
     FILE *f;
 
     Parametros p;
-    p.L=32;
+    p.L=8;
     p.J=1.0;
     p.H=-0.3;
     p.kBT=1.8;
 
     int N,n_sim,i,j,k,M,intento;
-    int red[p.L][p.L];
+    int red[p.L*p.L];
     char filename1[256];
 
     N=(int)p.L*p.L;
@@ -42,11 +42,10 @@ int main(){
 
         //Definimos la configuracion inicial: Todos los espines hacia arriba
         M=N;
-        for(i=0;i<p.L;i++){
-            for(j=0;j<p.L;j++){
-                red[i][j]=1;
-            }
+        for(i=0;i<(p.L*p.L);i++){
+                red[i]=1;
         }
+        
 
         while(M!=0){
             intento_glauber(p,red);
