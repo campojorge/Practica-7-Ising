@@ -68,7 +68,7 @@ int main(){
     FILE *f;
 
     Parametros p;
-    Nfold *nf;
+    Nfold nf;
     long long intentos;
     int delta_M;
 
@@ -86,7 +86,7 @@ int main(){
     n_sim=1;
     ini_ran(123456);
     int M;
-    nf->N = N;
+    nf.N = N;
 
     snprintf(filename1, sizeof(filename1),"../data_results/N-FW_N=%d_J=%lf_H=%lf_kBT=%lf.csv",N ,p.J,p.H,p.kBT);
     f=fopen(filename1, "w");
@@ -107,9 +107,9 @@ int main(){
                 red[i]=1;
         }
         
-        inicializar_nfold(p, nf, red);
+        inicializar_nfold(p, &nf, red);
         while(M>0){
-            paso_nfold(p, red,nf,&intentos,&delta_M);
+            paso_nfold(p, red,&nf,&intentos,&delta_M);
             M += delta_M;
             t+=intentos;
             fprintf(f, "%d %.12g %d \n",k,(double)intentos/N,M);
