@@ -60,7 +60,7 @@
     return 0;
 }*/
 
-static Nfold nf_global;      // fuera de main
+
 
 
 int main(){
@@ -69,7 +69,7 @@ int main(){
 
     Parametros p;
     Nfold nf;
-    long long intentos;
+    long long intentos,t;
     int delta_M;
 
     p.L=8;
@@ -77,7 +77,7 @@ int main(){
     p.H=-0.3;
     p.kBT=1.8;
 
-    int N,n_sim,i,j,k,t;
+    int N,n_sim,i,j,k;
     int red[p.L*p.L];
     char filename1[256];
 
@@ -112,7 +112,7 @@ int main(){
             paso_nfold(p, red,&nf,&intentos,&delta_M);
             M += delta_M;
             t+=intentos;
-            fprintf(f, "%d %.12g %d \n",k,(double)intentos/N,M);
+            fprintf(f, "%d %.12g %d \n",k,(double)t/N,M);
             
         }
     }

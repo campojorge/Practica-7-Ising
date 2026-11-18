@@ -319,6 +319,7 @@ void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_
     }
 
     *delta_M = 2 * red[sitio];
+    red[sitio] = -red[sitio];
     *intentos = m;
 }
 
@@ -331,7 +332,7 @@ void act_clase(int sitio, Nfold *nf, int *clase_f)
         clase_f[0]+= 5;
         for(i = 1;i<5;i++)
         {
-            clase_f[i] -= 1;
+            clase_f[i] += 1;
         } 
     }
     else 
@@ -339,7 +340,7 @@ void act_clase(int sitio, Nfold *nf, int *clase_f)
         clase_f[0] -= 5;
         for(i =1;i<5;i++)
         {
-            clase_f[i] +=1;
+            clase_f[i] -=1;
         }
     }
     
