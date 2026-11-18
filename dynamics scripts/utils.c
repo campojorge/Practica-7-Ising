@@ -134,7 +134,7 @@ double magnetizacion(Parametros p,int red[]){
     return M;
 }
 
-/*
+
 int clase_sitio(Parametros p,int red[],int sitio){
     int v[4];
     int n_arriba,i,clase;
@@ -149,12 +149,12 @@ int clase_sitio(Parametros p,int red[],int sitio){
         }
     }
 
-    /*
-    Clases 0..4:
+    
+    /*Clases 0..4:
         espín +1 con 4,3,2,1,0 vecinos arriba.
 
     Clases 5..9:
-        espín -1 con 4,3,2,1,0 vecinos arriba.
+        espín -1 con 4,3,2,1,0 vecinos arriba.*/
     
 
     if(red[sitio] == 1){
@@ -169,38 +169,38 @@ int clase_sitio(Parametros p,int red[],int sitio){
 }
 
 
-/*  MANEJO DE LAS LISTAS 
+//  MANEJO DE LAS LISTAS 
 
 void insertar(Nfold *nf, int sitio, int c){
     int pos;
-    pos = nf->cantidad[c];
+    pos = nf->NNCLS[c];
 
-    nf->lista[c][pos] = sitio;
-    nf->clase[sitio] = c;
-    nf->posicion[sitio] = pos;
-    nf->cantidad[c]++;
+    nf->LOC[c][pos] = sitio;
+    nf->LOOK[sitio] = c;
+    nf->LOOC[sitio] = pos;
+    nf->NNCLS[c]++;
 }
 
 void eliminar(Nfold *nf, int sitio){
     int c,pos,ultimo;
 
-    c = nf->clase[sitio];
-    pos = nf->posicion[sitio];
+    c = nf->LOOK[sitio];
+    pos = nf->LOOC[sitio];
 
     /*
     Rellenamos el hueco con el último elemento
-    de la misma clase.
+    de la misma clase.*/
     
-    nf->cantidad[c]--;
+    nf->NNCLS[c]--;
 
-    ultimo = nf->lista[c][nf->cantidad[c]];
+    ultimo = nf->LOC[c][nf->NNCLS[c]];
 
-    nf->lista[c][pos] = ultimo;
-    nf->posicion[ultimo] = pos;
+    nf->LOC[c][pos] = ultimo;
+    nf->LOOC[ultimo] = pos;
 }
 
 
-/*INICIALIZACIÓN
+/*INICIALIZACIÓN*/
 
 void inicializar_nfold(Parametros p,Nfold *nf,int red[]){
 
@@ -213,7 +213,7 @@ void inicializar_nfold(Parametros p,Nfold *nf,int red[]){
 
     // Preparar las diez clases
     for (c = 0; c < 10; c++){
-        nf->cantidad[c] = 0;
+        nf->NNCLS[c] = 0;
         delta_E=delta_energia2(p,c);
         nf->prob[c] = probabilidad_glauber(delta_E, p);
     }
@@ -227,107 +227,130 @@ void inicializar_nfold(Parametros p,Nfold *nf,int red[]){
 
 
 
-void paso_nfold(const Parametros p,int red[],Nfold *nf,double (*uniforme)(void),uint64_t *intentos,int *delta_M){
+void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_M){
+    
+    
     int c,c_elegida,i,j,ind,sitio,n_afectados,repetido;
     int v[4];
     int afectados[5];
     double peso[10];
-    double W,Q,m,objetivo,acumulada;
+    double m,objetivo,acumulada;
+    double W[10],Q[10];
+    int clase_f[5];
 
-    W=0.0;
+    for (i = 0; i<10;i++)
+    W[i] = 0;
+
     *intentos = 0;
     *delta_M = 0;
 
-    /* Peso de cada clase: n_c * p_c 
-    for (c = 0; c < 10; c++) {
-        peso[c] = nf->cantidad[c] * nf->prob[c];
-        W += peso[c];
+    // Peso de cada clase: n_c * p_c 
+    for(i = 0;i<10; i++)
+    {
+      for (c = 0; c < i; c++) 
+    {
+        peso[c] = nf->NNCLS[c] * nf->prob[c];
+        W[i] += peso[c];
+    }  
     }
-
-
-    /* Probabilidad total de aceptar un intento 
-    Q = W / nf->N;
-
-
-    /*
-    Tiempo de espera en intentos:
-
-        m = floor(log(r) / log(1-Q)) + 1
-
-    Se toma r = 1-u, con u en [0,1).
     
 
-    if (Q >= 1.0) {
+
+    // Probabilidad total de aceptar un intento 
+    for(i=0;i<10;i++)
+    Q[i] = W[i] / nf->N;
+
+
+    // Tiempo de espera en intentos:
+
+        //m = floor(log(Random()) / log(1-Q)) + 1
+
+    //Se toma r = 1-u, con u en [0,1).
+    
+
+    if (Q[9] >= 1.0) {
         m = 1.0;
     } 
     else {
-        m = floor(log1p(-uniforme()) / log1p(-Q)) + 1.0;
+        m = floor(log(Random()) / log1p(-Q[9])) + 1.0;
     }
 
 
-    /* Elegir la clase 
-    objetivo = uniforme() * W;
+    //Elegir la clase 
+    objetivo = Random() * Q[9];
     acumulada = 0.0;
 
     c_elegida = -1;
 
-    for (c = 0; c < 10; c++) {
-        if (peso[c] > 0.0) {
-            c_elegida = c;
-        }
-        acumulada += peso[c];
-        if (objetivo < acumulada) {
-            break;
+    for(i = 0;i<10;i++)
+    {
+        if(objetivo < Q[i])
+        {
+        c_elegida = i;
+        break;
         }
     }
 
-    /* Elegir un espín dentro de esa clase 
-    ind = (int)(uniforme() * nf->cantidad[c_elegida]);
+    //Elegir un espín dentro de esa clase 
+    ind = Random() * nf->NNCLS[c_elegida];
 
-    sitio = nf->lista[c_elegida][ind];
+    sitio = nf->LOC[c_elegida][ind];
 
-    n_afectados = 1;
     afectados[0] = sitio;
 
-    vecinos(sitio, p->L, v);
+    vecinos(sitio, p, v);
 
-    for (i = 0; i < 4; i++) {
-        repetido = 0;
-
-        for (int j = 0; j < n_afectados; ++j) {
-            if (afectados[j] == v[i]) {
-                repetido = 1;
-            }
-        }
-
-        /* Para L=2 algunos vecinos aparecen repetidos 
-        if (!repetido) {
-            afectados[n_afectados] = v[i];
-            n_afectados++;
-        }
+    for (i = 0; i < 4; i++) 
+    {
+        afectados[i+1] = v[i];
     }
 
-    /* Sacar los sitios afectados de sus clases 
-    for (i = 0; i < n_afectados; i++) {
+    //Sacar los sitios afectados de sus clases 
+    for (i = 0; i < 5; i++) {
         eliminar(nf, afectados[i]);
     }
 
-    /* Girar el espín seleccionado 
+    // Girar el espín seleccionado 
 
 
     red[sitio] = -red[sitio];
 
     *delta_M = 2 * red[sitio];
 
-    /* Introducir los sitios en sus nuevas clases 
-    for (int i = 0; i < n_afectados; ++i) {
-        int c = clase_sitio(p, red, afectados[i]);
-
-        insertar(nf, afectados[i], c);
+    // Introducir los sitios en sus nuevas clases 
+    for (i = 0; i < n_afectados; i++) {
+        clase_f[i] = clase_sitio(p, red, afectados[i]);
     }
 
-    *intentos = (uint64_t)m;
+    act_clase(sitio,nf,clase_f);
+    for(i=0; i<5; i++)
+    {
+        insertar(nf,afectados[i],clase_f[i]);
+    }
+
+    *intentos = m;
 }
 
-*/
+void act_clase(int sitio, Nfold *nf, int *clase_f)
+{
+    int i;
+
+    if ( clase_f[0] < 5) 
+    {
+        clase_f[0]+= 5;
+        for(i = 1;i<5;i++)
+        {
+            clase_f[i] -= 1;
+        } 
+    }
+    else 
+    {
+        clase_f[0] -= 5;
+        for(i =1;i<5;i++)
+        {
+            clase_f[i] +=1;
+        }
+    }
+    
+}
 

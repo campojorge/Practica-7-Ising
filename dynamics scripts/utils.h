@@ -12,13 +12,13 @@ typedef struct {
     int N;
 
     /* Número de espines y probabilidad de cada clase */
-    int cantidad[10];
+    int NNCLS[10];
     double prob[10];
 
     /* Arrays normales: no necesitan malloc */
-    int lista[10][N_MAX];
-    int clase[N_MAX];
-    int posicion[N_MAX];
+    int LOC[10][N_MAX];
+    int LOOK[N_MAX];
+    int LOOC[N_MAX];
 
 } Nfold;
 
@@ -29,13 +29,14 @@ double delta_energia2(Parametros p, int clase);
 double probabilidad_glauber(double delta_E, Parametros p);
 void intento_glauber(Parametros p, int red[]);
 double magnetizacion(Parametros p,int red[]);
-/*
+
+ // FUNCIONES N-FOLD WAY
 
 int clase_sitio(Parametros p,int red[],int sitio);
 void insertar(Nfold *nf, int sitio, int c);
 void eliminar(Nfold *nf, int sitio);
 void inicializar_nfold(Parametros p,Nfold *nf, int red[]);
-int paso_nfold(const Parametros *p,int red[p->L][p->L],Nfold *nf,double (*uniforme)(void),uint64_t *intentos,int *delta_M);
+void act_clase(int sitio, Nfold *nf, int *clase_f);
+void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_M);
 
-*/
 
