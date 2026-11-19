@@ -318,8 +318,8 @@ void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_
         insertar(nf,afectados[i],clase_f[i]);
     }
 
-    *delta_M = 2 * red[sitio];
     red[sitio] = -red[sitio];
+    *delta_M = 2 * red[sitio];
     *intentos = m;
 }
 

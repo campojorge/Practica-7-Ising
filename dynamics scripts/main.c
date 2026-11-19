@@ -102,7 +102,7 @@ int main(){
 
         t=0;
         //Definimos la configuracion inicial: Todos los espines hacia arriba
-        M=N;
+        M = N;
         for(i=0;i<(p.L*p.L);i++){
                 red[i]=1;
         }
@@ -111,8 +111,9 @@ int main(){
         while(M>0){
             paso_nfold(p, red,&nf,&intentos,&delta_M);
             M += delta_M;
+            
             t+=intentos;
-            fprintf(f, "%d %.12g %d \n",k,(double)t/N,M);
+            fprintf(f, "%d %.12g %d\n",k,(double)t/N,M);
             
         }
     }
