@@ -8,22 +8,25 @@
 
 
 
-/*int main(){
+int main(){
 
     FILE *f;
 
     Parametros p;
+
+
+    int N,n_sim,i,k,M,ite;
+    char filename1[256];
+    double t_CPU;
     p.L=8;
     p.J=1.0;
     p.H=-0.3;
     p.kBT=1.8;
+    n_sim=1000;
 
-    int N,n_sim,i,j,k,M,intento;
     int red[p.L*p.L];
-    char filename1[256];
 
     N=(int)p.L*p.L;
-    n_sim=1;
     ini_ran(123456);
 
     snprintf(filename1, sizeof(filename1),"../data_results/N=%d_J=%lf_H=%lf_kBT=%lf.csv",N ,p.J,p.H,p.kBT);
@@ -34,12 +37,11 @@
         return 1;
     }
 
-    fprintf(f, "# simulacion t M\n");
+    fprintf(f, "# simulacion iteraciones t_CPU MCSS\n");
 
     for(k=0;k<n_sim;k++){
-
-        intento=0;
-
+        ite=0;
+        clock_t inicio = clock();
         //Definimos la configuracion inicial: Todos los espines hacia arriba
         M=N;
         for(i=0;i<(p.L*p.L);i++){
@@ -50,18 +52,19 @@
         while(M!=0){
             intento_glauber(p,red);
             M=magnetizacion(p,red);
-            intento++;
-            fprintf(f, "%d %.12g %d \n",k,(double)intento/N,M);
-            
+            ite++;
         }
+        clock_t fin=clock();
+        t_CPU = (double)(fin - inicio) / CLOCKS_PER_SEC;
+        fprintf(f, "%d %d %.6f %.12g\n",k,ite,t_CPU,(double)ite/N);
     }
     fclose(f);
 
     return 0;
-}*/
+}
 
 
-
+/*
 
 int main(){
 
@@ -70,23 +73,24 @@ int main(){
     Parametros p;
     Nfold nf;
     long long intentos,t;
-    int delta_M;
+    int N,n_sim,i,k,delta_M,M;
+    int ite;
+    char filename1[256];
+    double t_CPU;
+    
 
     p.L=8;
     p.J=1.0;
     p.H=-0.3;
     p.kBT=1.8;
+    n_sim=1000;
 
-    int N,n_sim,i,j,k;
     int red[p.L*p.L];
-    char filename1[256];
-
-    
+  
     N=(int)p.L*p.L;
-    n_sim=1;
-    ini_ran(123456);
-    int M;
     nf.N = N;
+    ini_ran(123456);
+
 
     snprintf(filename1, sizeof(filename1),"../data_results/N-FW_N=%d_J=%lf_H=%lf_kBT=%lf.csv",N ,p.J,p.H,p.kBT);
     f=fopen(filename1, "w");
@@ -96,11 +100,12 @@ int main(){
         return 1;
     }
 
-    fprintf(f, "# simulacion t M\n");
+    fprintf(f, "# simulacion iteraciones t_CPU MCSS\n");
 
     for(k=0;k<n_sim;k++){
-
+        ite=0;
         t=0;
+        clock_t inicio = clock();
         //Definimos la configuracion inicial: Todos los espines hacia arriba
         M = N;
         for(i=0;i<(p.L*p.L);i++){
@@ -113,13 +118,15 @@ int main(){
             M += delta_M;
             
             t+=intentos;
-            fprintf(f, "%d %.12g %d\n",k,(double)t/N,M);
-            
+            ite++;
         }
+        clock_t fin=clock();
+        t_CPU = (double)(fin - inicio) / CLOCKS_PER_SEC;
+        fprintf(f, "%d %d %.6f %.12g\n",k,ite,t_CPU,(double)t/N);
     }
     fclose(f);
 
     return 0;
 }
 
-
+*/
