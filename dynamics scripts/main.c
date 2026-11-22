@@ -55,7 +55,7 @@ int main(){
         
         corr=calcular_correlacion(red,red_inicial,N);
         fprintf(g, "%d %.12g %.10f\n",k,(double)ite/N,corr);
-        while(M!=0){
+        while(M>0){
             intento_glauber(p,red);
             M=magnetizacion(p,red);
             ite++;
