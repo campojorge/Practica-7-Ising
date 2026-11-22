@@ -38,5 +38,6 @@ void eliminar(Nfold *nf, int sitio);
 void inicializar_nfold(Parametros p,Nfold *nf, int red[]);
 void act_clase(int sitio, Nfold *nf, int *clase_f);
 void paso_nfold(Parametros p,int red[],Nfold *nf,long long *intentos,int *delta_M);
+double calcular_correlacion(int red[],int red_inicial[],int N);
 
 

@@ -1,4 +1,6 @@
+
 from pathlib import Path
+import re
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -12,12 +14,9 @@ BASE = Path(__file__).resolve().parent
 CARPETA_DATOS = BASE / "../data_results"
 CARPETA_PLOTS = BASE / "../plot_results"
 
-NOMBRE = "N=64_J=1.000000_H=-0.300000_kBT=1.800000"
-
-ARCHIVO_GLAUBER = CARPETA_DATOS / f"{NOMBRE}.csv"
-ARCHIVO_NFOLD = CARPETA_DATOS / f"N-FW_{NOMBRE}.csv"
-
-SALIDA = CARPETA_PLOTS / f"distribucion_MCSS_{NOMBRE}.png"
+N = 64
+J = 1.0
+H = -0.3
 
 # None: espacios o tabulaciones. Usa "," si separas con comas.
 DELIMITADOR = None
@@ -26,6 +25,35 @@ DELIMITADOR = None
 SALTAR_FILAS = 0
 
 NUM_BINS = 60
+
+
+# ============================================================
+# DETECTAR TEMPERATURAS DISPONIBLES
+# ============================================================
+
+def buscar_temperaturas():
+
+    patron = (
+        f"N={N}_J={J:.6f}_H={H:.6f}_kBT=*.csv"
+    )
+
+    temperaturas = []
+
+    for archivo in CARPETA_DATOS.glob(patron):
+
+        # Excluimos los archivos N-fold Way
+        if archivo.name.startswith("N-FW_"):
+            continue
+
+        coincidencia = re.search(
+            r"kBT=([-+]?\d+(?:\.\d+)?)\.csv$",
+            archivo.name
+        )
+
+        if coincidencia:
+            temperaturas.append(float(coincidencia.group(1)))
+
+    return sorted(set(temperaturas))
 
 
 # ============================================================
@@ -59,10 +87,27 @@ def leer_tiempos(archivo):
 
 
 # ============================================================
-# GRÁFICA
+# GRÁFICA PARA UNA TEMPERATURA
 # ============================================================
 
-def main():
+def plot_distribucion(kBT):
+
+    NOMBRE = (
+        f"N={N}_J={J:.6f}_H={H:.6f}_kBT={kBT:.6f}"
+    )
+
+    ARCHIVO_GLAUBER = CARPETA_DATOS / f"{NOMBRE}.csv"
+    ARCHIVO_NFOLD = CARPETA_DATOS / f"N-FW_{NOMBRE}.csv"
+
+    SALIDA = CARPETA_PLOTS / f"distribucion_MCSS_{NOMBRE}.png"
+
+    if not ARCHIVO_GLAUBER.exists():
+        print(f"No existe: {ARCHIVO_GLAUBER}")
+        return
+
+    if not ARCHIVO_NFOLD.exists():
+        print(f"No existe: {ARCHIVO_NFOLD}")
+        return
 
     tiempos_glauber = leer_tiempos(ARCHIVO_GLAUBER)
     tiempos_nfold = leer_tiempos(ARCHIVO_NFOLD)
@@ -86,11 +131,13 @@ def main():
         ("N-fold way", tiempos_nfold, "tab:orange"),
     ]
 
+    print(f"\n========== kBT = {kBT:.6f} ==========")
+
     for ax, (nombre, tiempos, color) in zip(ejes, conjuntos):
 
         media = np.mean(tiempos)
 
-        # Varianza muestral: requiere al menos dos simulaciones.
+        # Varianza muestral.
         varianza = (
             np.var(tiempos, ddof=1)
             if len(tiempos) > 1
@@ -107,7 +154,7 @@ def main():
             alpha=0.85,
         )
 
-        # Recuadro con los resultados, sin línea vertical.
+        # Recuadro con media y varianza.
         texto = f"Media = {media:.2f} MCSS\n"
 
         if varianza is not None:
@@ -147,13 +194,17 @@ def main():
         ax.set_ylim(bottom=0)
 
         if varianza is not None:
+
             error_media = np.sqrt(varianza / len(tiempos))
 
             print(
                 f"{nombre}: media = {media:.6g} "
                 f"± {error_media:.3g} MCSS (error estándar)"
             )
-            print(f"Varianza muestral = {varianza:.6g} MCSS²\n")
+
+            print(
+                f"Varianza muestral = {varianza:.6g} MCSS²\n"
+            )
 
         else:
             print(
@@ -167,17 +218,38 @@ def main():
     )
 
     fig.suptitle(
-        r"Distribución de tiempos de llegada a $M=0$",
+        rf"Distribución de tiempos de llegada a $M=0$"
+        rf" — $k_BT={kBT:g}$",
         fontsize=17,
         fontweight="bold",
     )
 
-    CARPETA_PLOTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(SALIDA, dpi=300)
+    plt.close(fig)
 
     print(f"Gráfica guardada en: {SALIDA.resolve()}")
 
 
+# ============================================================
+# MAIN
+# ============================================================
+
+def main():
+
+    CARPETA_PLOTS.mkdir(parents=True, exist_ok=True)
+
+    temperaturas = buscar_temperaturas()
+
+    if not temperaturas:
+        print("No se encontraron archivos para los parámetros indicados.")
+        return
+
+    print("Temperaturas encontradas:", temperaturas)
+
+    for kBT in temperaturas:
+        plot_distribucion(kBT)
+
+    print("\nTodas las gráficas han sido generadas.")
 
 
 if __name__ == "__main__":

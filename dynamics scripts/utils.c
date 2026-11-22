@@ -36,6 +36,7 @@ double delta_energia(Parametros p, int red[], int sitio){
     return delta;
 }
 
+
 double delta_energia2(Parametros p, int clase){
     double delta;
 
@@ -77,7 +78,7 @@ double delta_energia2(Parametros p, int clase){
     return delta;
 }
 
-   
+
 
 double probabilidad_glauber(double delta_E, Parametros p){
     double prob;
@@ -346,3 +347,14 @@ void act_clase(int sitio, Nfold *nf, int *clase_f)
     
 }
 
+double calcular_correlacion(int red[],int red_inicial[],int N) {
+    int i;
+    double suma;
+    suma = 0.0;
+
+    for (i = 0; i < N; i++) {
+        suma += red_inicial[i] * red[i];
+    }
+
+    return suma / N;
+}
