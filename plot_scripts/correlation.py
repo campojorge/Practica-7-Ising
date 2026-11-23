@@ -23,7 +23,7 @@ MOSTRAR_GRAFICAS = False
 
 
 # ============================================================
-# PARÁMETROS DEL NOMBRE DEL FICHERO
+# EXTRAER PARÁMETROS DEL NOMBRE
 # ============================================================
 
 def parametros(nombre):
@@ -52,11 +52,12 @@ def parametros(nombre):
 
 
 # ============================================================
-# LECTURA, RECORTE Y PROMEDIO
+# LEER Y PROMEDIAR LAS SIMULACIONES
 # ============================================================
 
 def leer_correlacion(archivo):
 
+    # Columnas: simulación, tiempo MCSS, correlación Q.
     datos = np.loadtxt(
         archivo,
         comments="#",
@@ -81,49 +82,49 @@ def leer_correlacion(archivo):
             "La correlación debe estar entre -1 y 1"
         )
 
-    simulaciones = []
+    tiempos = None
+    curvas = []
 
     for sim in np.unique(datos[:, 0]):
 
         filas = datos[datos[:, 0] == sim]
+
+        # Ordenar las medidas por tiempo.
         filas = filas[np.argsort(filas[:, 1])]
 
-        tiempos = np.round(filas[:, 1], decimals=9)
+        t = filas[:, 1]
+        q = filas[:, 2]
 
-        if np.any(np.diff(tiempos) <= 0):
+        if np.any(np.diff(t) <= 0):
             raise ValueError(
-                f"Tiempos repetidos o demasiado próximos "
-                f"en la simulación {sim:g}"
+                f"Tiempos repetidos en la simulación {sim:g}"
             )
 
-        simulaciones.append((tiempos, filas[:, 2]))
+        if tiempos is None:
+            tiempos = t.copy()
 
-    # Menor tiempo final de las simulaciones del fichero.
-    t_final = min(t[-1] for t, _ in simulaciones)
+        elif (
+            len(t) != len(tiempos)
+            or not np.allclose(
+                t, tiempos, rtol=0, atol=1e-9
+            )
+        ):
+            raise ValueError(
+                f"La simulación {sim:g} tiene tiempos "
+                "distintos a los de la primera"
+            )
 
-    # Conservar únicamente tiempos presentes en todas.
-    comunes = simulaciones[0][0]
-    comunes = comunes[comunes <= t_final]
+        curvas.append(q)
 
-    for t, _ in simulaciones[1:]:
-        comunes = np.intersect1d(
-            comunes,
-            t[t <= t_final]
-        )
-
-    if comunes.size == 0:
-        raise ValueError(
-            "No hay tiempos comunes a todas las simulaciones"
-        )
-
-    curvas = np.asarray([
-        q[np.searchsorted(t, comunes)]
-        for t, q in simulaciones
-    ])
+    # Filas: simulaciones. Columnas: tiempos de medida.
+    curvas = np.asarray(curvas)
 
     n = len(curvas)
+
+    # Media entre simulaciones para cada tiempo.
     media = curvas.mean(axis=0)
 
+    # Error estándar de la media.
     if n > 1:
         error = curvas.std(axis=0, ddof=1) / np.sqrt(n)
     else:
@@ -131,11 +132,11 @@ def leer_correlacion(archivo):
 
     print(
         f"  {archivo.name}: "
-        f"{n} simulaciones, {len(comunes)} tiempos comunes, "
-        f"hasta {comunes[-1]:g} MCSS"
+        f"{n} simulaciones, {len(tiempos)} tiempos; "
+        f"desde {tiempos[0]:g} hasta {tiempos[-1]:g} MCSS"
     )
 
-    return comunes, media, error, n
+    return tiempos, media, error, n
 
 
 # ============================================================
@@ -201,12 +202,12 @@ def dibujar(ax, archivo, metodo, p):
             label="Media ± error estándar"
         )
 
-    # Teoría solo para J=H=0 y temperatura positiva.
+    # Teoría únicamente para J=H=0 y temperatura positiva.
     if p["J"] == 0 and p["H"] == 0 and p["kBT"] > 0:
 
         if metodo == "n-fold Way":
 
-            # Teoría de tiempo continuo.
+            # Teoría para el reloj continuo.
             tt = np.linspace(0, t.max(), 600)
 
             ax.plot(
@@ -218,9 +219,10 @@ def dibujar(ax, archivo, metodo, p):
 
         else:
 
-            # Teoría discreta de Glauber.
+            # Número de intentos completados hasta t.
             pasos = p["N"] * t
 
+            # Evitar errores numéricos cerca de los enteros.
             pasos = np.where(
                 np.isclose(
                     pasos,
@@ -247,7 +249,7 @@ def dibujar(ax, archivo, metodo, p):
 
         ax.text(
             0.5, 0.5,
-            "Solo hay un tiempo común",
+            "Solo hay un tiempo de medida",
             ha="center",
             transform=ax.transAxes
         )
@@ -258,7 +260,7 @@ def dibujar(ax, archivo, metodo, p):
 
 
 # ============================================================
-# EMPAREJAR FICHEROS Y GUARDAR LOS PNG
+# EMPAREJAR FICHEROS Y GUARDAR LAS FIGURAS
 # ============================================================
 
 def main():
@@ -280,6 +282,7 @@ def main():
 
         for archivo in archivos:
 
+            # Parte del nombre que contiene los parámetros.
             nombre = archivo.stem[len(prefijo):]
 
             grupos.setdefault(nombre, {})[metodo] = archivo
@@ -348,6 +351,7 @@ def main():
             )
 
             fig.savefig(salida, dpi=300)
+
             print(f"Guardado: {salida}")
 
             if MOSTRAR_GRAFICAS:
