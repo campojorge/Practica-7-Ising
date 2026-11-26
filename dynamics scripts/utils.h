@@ -29,6 +29,7 @@ double delta_energia2(Parametros p, int clase);
 double probabilidad_glauber(double delta_E, Parametros p);
 void intento_glauber(Parametros p, int red[]);
 double magnetizacion(Parametros p,int red[]);
+double energy(Parametros p, int red[]);
 
  // FUNCIONES N-FOLD WAY
 

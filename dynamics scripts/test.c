@@ -65,7 +65,7 @@ int main(){
 }
 
 */
-
+/*
 int main(){
     FILE *g;
 
@@ -151,3 +151,12 @@ int main(){
     fclose(g);
     return 0;
 }
+*/
+
+// NUEVO MAIN PARA EL TEST 2 (CURVAS <M(t)>,<E(t)> Y <H(t)>)
+
+       
+            
+    
+        
+

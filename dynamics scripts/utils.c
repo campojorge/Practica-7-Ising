@@ -36,6 +36,24 @@ double delta_energia(Parametros p, int red[], int sitio){
     return delta;
 }
 
+double energy(Parametros p, int red[])
+{
+    int M;
+    int E = 0;
+    int i;
+    int v[4];
+    // INTERACCION ESPIN - ESPIN 
+    for(i=0;i<p.L*p.L;i++)
+    {
+        vecinos(i,p,v);
+        E-= p.J * (red[i] * (red[v[0]] + red[v[1]] + red[v[2]] + red[v[3]]));
+    }
+
+    // INTERACCION ESPIN - CAMPO EXTERNO
+    M = magnetizacion(p,red);
+    E -= M*p.H;
+    return E;
+}
 
 double delta_energia2(Parametros p, int clase){
     double delta;
